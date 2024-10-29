@@ -96,8 +96,8 @@ run_edger <- function(count_dataframe, group) {
   # create DGEList
   y <- DGEList(counts = count_dataframe, group = group)
   
-  # remove low-count genes, min.count=10 like run_deseq
-  keep <- filterByExpr(y, min.count=10) 
+  # remove low-count genes, like run_deseq
+  keep <- filterByExpr(y) 
   y <- y[keep, , keep.lib.sizes=FALSE]
   # normalize
   y <- calcNormFactors(y)
@@ -105,10 +105,8 @@ run_edger <- function(count_dataframe, group) {
   
   # exact test for diff expression
   et <- exactTest(y)
-  res <- topTags(et, n = Inf)$table
   # three columns of data: logFC, logCPM, and PValue
-  res <- res %>% 
-    # isolate columns
+  res <- et$table %>% 
     select("logFC", "logCPM", "PValue")
   
   return(res)
@@ -135,8 +133,9 @@ run_edger <- function(count_dataframe, group) {
 #' 
 #' @examples run_limma(counts_df, design, voom=TRUE)
 run_limma <- function(counts_dataframe, design, group) {
+  # FIXME doesnt look like reference, doesnt use group argument
   y <- DGEList(counts = counts_dataframe)
-  # remove low-count genes, min.count=10 like run_deseq
+  # remove low-count genes, like run_deseq
   keep <- filterByExpr(y, design=design)
   y <- y[keep, , keep.lib.sizes=FALSE]
   
@@ -149,7 +148,7 @@ run_limma <- function(counts_dataframe, design, group) {
   fit <- eBayes(fit)
   
   # sort by p-value
-  res <- topTable(fit, number = Inf, sort.by = "p", coef = ncol(design))
+  res <- topTable(fit, number = Inf, resort.by = "P", coef = ncol(design))
   
   return(res)
 }
