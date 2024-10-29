@@ -133,15 +133,13 @@ run_edger <- function(count_dataframe, group) {
 #' 
 #' @examples run_limma(counts_df, design, voom=TRUE)
 run_limma <- function(counts_dataframe, design, group) {
-  # FIXME doesnt look like reference, doesnt use group argument
   y <- DGEList(counts = counts_dataframe)
   # remove low-count genes, like run_deseq
   keep <- filterByExpr(y, design=design)
   y <- y[keep, , keep.lib.sizes=FALSE]
   
   # Normalize the counts and voom
-  y <- calcNormFactors(y)
-  v <- voom(y, design = design, plot = FALSE)
+  v <- voom(y, design = design, plot = FALSE, normalize='quantile')
   
   # linear model and empirical Bayes moderation
   fit <- lmFit(v, design)
@@ -270,12 +268,22 @@ create_facets <- function(deseq, edger, limma) {
 #'
 #' @examples p <- theme_plot(volcano)
 theme_plot <- function(volcano_data) {
-  g <- volcano_data %>% ggplot(aes(x = logFC, y = -log10(padj))) +
+  volcano_data <- volcano_data %>%
+    mutate(`P-adj < 1e-100` = padj < 1e-100)
+  
+  # Plot with conditional color
+  g <- volcano_data %>%
+    ggplot(aes(x = logFC, y = -log10(padj), color = `P-adj < 1e-100`)) +
     geom_point() +
+    scale_color_manual(values = c("black", "red")) + # black for below 1e-100, red for above
     facet_wrap(~ package) +
-    ggtitle("Volcano plot comparison of three diff. expression R packages") +
+    labs(title='Volcano plot comparison of three diff. expression R packages',
+         subtitle = 'Comparing day 0 vs. adult mouse myocardial cells') +
+    xlab(expression('log'[2]*'fold-change')) +
+    ylab(expression('-log'[10]*'(p adjusted)')) +
     theme_bw()
-  # FIXME: Adjusted p-values above 1e-100 are highlighted in red
+    
+  
   return(g)
 }
 
