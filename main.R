@@ -182,7 +182,22 @@ run_limma <- function(counts_dataframe, design, group) {
 #' 2 deseq   9.97e-261
 #' 3 deseq   1.16e-206
 combine_pval <- function(deseq, edger, limma) {
-    return(NULL)
+  # deseq
+  result <- tibble(
+    package = rep('deseq', times = length(deseq$pvalue)), # label each package
+    pval = deseq$pvalue)
+    # edgeR
+  result <- rbind(result, tibble(
+    package = rep('edger', times = length(edger$PValue)),# label each package
+    pval = edger$PValue
+    ))
+  # limma
+  result <- rbind(result, tibble(
+      package = rep('limma', times = length(limma$P.Value)),# label each package
+      pval = limma$P.Value
+    ))
+  
+  return(result)
 }
 
 #' Create three separate facets for each of the diff. exp. pacakges.
@@ -206,7 +221,26 @@ combine_pval <- function(deseq, edger, limma) {
 #' 1  -9.84 2.23e-180 edgeR  
 #' 2   6.18 5.87e-179 edgeR  
 create_facets <- function(deseq, edger, limma) {
-    return(NULL)
+  # deseq
+  result <- tibble(
+    logFC = deseq$log2FoldChange,
+    padj = deseq$padj,
+    package = rep('deseq', times = 1000) # label each package
+    )
+  # edgeR
+  result <- rbind(result, tibble(
+    logFC = edger$logFC,
+    padj = edger$padj,
+    package = rep('edgeR', times = 1000) # label each package
+  ))
+  # limma
+  result <- rbind(result, tibble(
+    logFC = limma$logFC,
+    padj = limma$adj.P.Val,
+    package = rep('limma', times = 1000) # label each package
+  ))
+  
+  return(result)
 }
 
 #' Create an attractive volcano plot of three diff. exp. packages' data.
@@ -236,6 +270,12 @@ create_facets <- function(deseq, edger, limma) {
 #'
 #' @examples p <- theme_plot(volcano)
 theme_plot <- function(volcano_data) {
-    return(NULL)
+  g <- volcano_data %>% ggplot(aes(x = logFC, y = -log10(padj))) +
+    geom_point() +
+    facet_wrap(~ package) +
+    ggtitle("Volcano plot comparison of three diff. expression R packages") +
+    theme_bw()
+  # FIXME: Adjusted p-values above 1e-100 are highlighted in red
+  return(g)
 }
 
