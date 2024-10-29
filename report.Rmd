@@ -14,6 +14,9 @@ This assignment will involve a decent amount of documentation reading, but the r
 ## Setup
 ```{r Packages + setup, }
 source("main.R") # load all our wonderful functions
+# install.packages("ggVennDiagram")
+library(ggVennDiagram)
+library('tidyverse')
 knitr::opts_chunk$set(echo = FALSE) # no markdown for you <3
 ```
 
@@ -91,12 +94,13 @@ cat("head(deseq_results), notice the order of the p-values nad p-adjusted values
 We want to create a venn diagram using the `ggVennDiagram` package. This package asks for a list object as input, so we can create a list that contains the three named collections of genes from our separate packages. Calling row.names() will give us the names of all the genes.
 More info here: [ggVennDiagram](https://r-charts.com/part-whole/ggvenndiagram/)
 ```{r Venn diagram, fig.align='center', fig.cap="Figure 1 - A venn diagram comparing the top 1,000 differentially expressed genes from three different R packages ordered by ascending p-value. A Lighter shade of blue indicates a higher proportion of shared genes."}
+
 x <- list(EdgeR = row.names(edger_res), 
           DESeq2 = row.names(deseq_res),
           Limma = row.names(limma_res))
 
 ggVennDiagram(x) +
-  ggtitle("Top 1000 genes from three diff. exp. R packages")
+  ggplot2::ggtitle("Top 1000 genes from three diff. exp. R packages")
 ```
 
 While plots can be used to create publication ready images, we can also utilize them to check our data and confirm our assumptions. Limma seems to have a number of selected genes that don't match DESeq2 and edgeR, so we're interested to see how the distributions of p-values compare to one another. We did not write this plot as a function, but can use the data we generate with `combine_pval()` to `facet_wrap()` the three data sets together. Use facet wrap with the `~ package` parameter to recreate the figure below. 
