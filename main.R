@@ -1,5 +1,5 @@
 #!/usr/bin/Rscript
-## Author: Taylor Falk
+## Author: Taylor Falk, Student: Mindy Tran Fall 2024
 ## tfalk@bu.edu
 ## BU BF591
 ## Assignment Week 6
@@ -33,7 +33,11 @@ for (package in libs) {
 #'
 #' @examples counts_df <- load_n_trim("/path/to/counts/verse_counts.tsv")
 load_n_trim <- function(filename) {
-    return(NULL)
+  result <- read.delim(filename, sep='\t', row.names = 'gene')
+  result <- result %>% 
+    # isolate columns named "vP0_1", "vP0_2", "vAd_1", and "vAd_2"
+    select("vP0_1", "vP0_2", "vAd_1", "vAd_2")
+  return(result)
 }
 
 #' Perform a DESeq2 analysis of rna seq data
@@ -57,7 +61,19 @@ load_n_trim <- function(filename) {
 #'
 #' @examples run_deseq(counts_df, coldata, 10, "condition_day4_vs_day7")
 run_deseq <- function(count_dataframe, coldata, count_filter, condition_name) {
-    return(NULL)
+  count_dataframe <- count_dataframe[rowSums(count_dataframe) >= count_filter, ]
+  # df as matrix
+  mat <- count_dataframe %>% as.matrix()
+  
+  
+  dds <- DESeqDataSetFromMatrix(countData = mat,
+                                colData = coldata,
+                                design = ~ condition)
+  
+  dds <- DESeq(dds)
+  res <- results(dds, name=condition_name) 
+  
+  return(res)
 }
 
 #### edgeR ####
@@ -77,8 +93,26 @@ run_deseq <- function(count_dataframe, coldata, count_filter, condition_name) {
 #'
 #' @examples run_edger(counts_df, group)
 run_edger <- function(count_dataframe, group) {
-    return(NULL)
-}
+  # create DGEList
+  y <- DGEList(counts = count_dataframe, group = group)
+  
+  # remove low-count genes, min.count=10 like run_deseq
+  keep <- filterByExpr(y, min.count=10) 
+  y <- y[keep, , keep.lib.sizes=FALSE]
+  # normalize
+  y <- calcNormFactors(y)
+  y <- estimateDisp(y)
+  
+  # exact test for diff expression
+  et <- exactTest(y)
+  res <- topTags(et, n = Inf)$table
+  # three columns of data: logFC, logCPM, and PValue
+  res <- res %>% 
+    # isolate columns
+    select("logFC", "logCPM", "PValue")
+  
+  return(res)
+} 
 
  #### limma ####
 #' Perform an analysis using Limma, with an mandatory voom component.
@@ -101,7 +135,31 @@ run_edger <- function(count_dataframe, group) {
 #' 
 #' @examples run_limma(counts_df, design, voom=TRUE)
 run_limma <- function(counts_dataframe, design, group) {
-    return(NULL)
+  # Create a DGEList object from the count data
+  y <- DGEList(counts = counts_dataframe)
+  
+  # remove low-count genes, min.count=10 like run_deseq
+  keep <- filterByExpr(y, min.count=10) 
+  y <- y[keep, , keep.lib.sizes=FALSE]
+  
+  # Normalize the counts
+  y <- calcNormFactors(y)
+  
+  # Apply voom transformation with the provided design matrix
+  v <- voom(y, design = design, plot = FALSE)
+  
+  # Fit the linear model using the design matrix
+  fit <- lmFit(v, design)
+  
+  # Apply empirical Bayes moderation
+  fit <- eBayes(fit)
+  
+  # Get the top results, sorted by p-value, with specific columns
+  res <- topTable(fit, number = 1000, sort.by = "p", coef = 1)
+  
+  # res <- res[, c("logFC", "P.Value", "adj.P.Val", "Gene")] 
+  
+  return(res)
 }
 
 #### ggplot ####
