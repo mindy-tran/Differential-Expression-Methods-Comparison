@@ -135,29 +135,21 @@ run_edger <- function(count_dataframe, group) {
 #' 
 #' @examples run_limma(counts_df, design, voom=TRUE)
 run_limma <- function(counts_dataframe, design, group) {
-  # Create a DGEList object from the count data
   y <- DGEList(counts = counts_dataframe)
-  
   # remove low-count genes, min.count=10 like run_deseq
-  keep <- filterByExpr(y, min.count=10) 
+  keep <- filterByExpr(y, design=design)
   y <- y[keep, , keep.lib.sizes=FALSE]
   
-  # Normalize the counts
+  # Normalize the counts and voom
   y <- calcNormFactors(y)
-  
-  # Apply voom transformation with the provided design matrix
   v <- voom(y, design = design, plot = FALSE)
   
-  # Fit the linear model using the design matrix
+  # linear model and empirical Bayes moderation
   fit <- lmFit(v, design)
-  
-  # Apply empirical Bayes moderation
   fit <- eBayes(fit)
   
-  # Get the top results, sorted by p-value, with specific columns
-  res <- topTable(fit, number = 1000, sort.by = "p", coef = 1)
-  
-  # res <- res[, c("logFC", "P.Value", "adj.P.Val", "Gene")] 
+  # sort by p-value
+  res <- topTable(fit, number = Inf, sort.by = "p", coef = ncol(design))
   
   return(res)
 }
