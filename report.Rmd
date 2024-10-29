@@ -99,7 +99,7 @@ x <- list(EdgeR = row.names(edger_res),
           DESeq2 = row.names(deseq_res),
           Limma = row.names(limma_res))
 
-ggVennDiagram(x) +
+ggVennDiagram(x, set_color=c("red","green","blue")) +
   ggplot2::ggtitle("Top 1000 genes from three diff. exp. R packages")
 ```
 
@@ -147,7 +147,7 @@ x <- list(EdgeR = row.names(edger_res),
           Voom = row.names(limma_res),
           Limma = row.names(vooml))
 
-ggVennDiagram(x) +
+ggVennDiagram(x, set_color=c("red","green","blue", "purple")) +
   ggtitle("Top 1000 genes from FOUR diff. exp. R packages")
 ```
 
