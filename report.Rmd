@@ -1,7 +1,7 @@
 ---
 title: "Assignment 6 Report"
-author: "Taylor Falk"
-date: "1/24/2022"
+author: "Mindy Tran"
+date: "10/31/2024"
 output: html_document
 ---
 
@@ -10,19 +10,6 @@ We are interested in examining how three differential expression packages (DESeq
 
 This assignment will involve a decent amount of documentation reading, but the relevant information is linked in the `main.R` function descriptions. 
 
-<h2 style="color:red">**WARNING** For SCC Users</h2>
-One of the libraries we utilize in this project, ggVennDiagram, requires some packages that are not enabled by default on SCC. If you install this package while using RStudio on your machine, you are likely not to run into this problem. In order to load these packages, we will enter two packages into the RStudio Server prompt when starting it on SCC (big shout outs to Mae Rose for solving this one!). 
-
-Open the RStudio Server launcher on the SCC for web interface, and click on "Select Modules".
-![](mkd_img/scc1.png)
-
-While in this submenu, search and select the modules `proj/8.2.1` and `sqlite3/3.37.2`. Your screen should look like the below image.
-![](mkd_img/scc2.png)
-
-Finally, close out, your page should look like this final image. Proceed to start the session as normal.
-![](mkd_img/scc3.png)
-
-If you like aesthetics, feel free to remove the above warning section from your final report.
 
 ## Setup
 ```{r Packages + setup, }
@@ -51,6 +38,8 @@ coldata
 deseq_res <- run_deseq(counts_df, coldata, 10, "condition_day0_vs_adult")
 cat("deseq results:")
 head(deseq_res)
+# deseq_res[deseq_res$baseMean >= 4, ]
+dim(deseq_res)
 ```
 
 ### EdgeR

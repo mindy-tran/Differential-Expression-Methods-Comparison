@@ -1,6 +1,7 @@
 #!/usr/bin/Rscript
 source("main.R")
 library(testthat)
+# testthat::test_file('test_main.R')
 
 csv <- paste0("data/verse_counts.tsv")
 
