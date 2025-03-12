@@ -1,12 +1,10 @@
-# Assignment Differential Expression Part 2
+# Differential Expression analysis in R
 
 > Volcanoes don't really look like that, do they?
 
 ## Problem Statement
 Because R has been utilized in bioinformatics communities for years at this point, there are many different approaches to do one task. While in the last assignment we just used DESeq2, we will be performing differential expression analysis with two additional packages (edgeR and Limma) and comparing the results we find.
 
-## Required Readings
-This assignment will draw upon many concepts primarily from Chapters 6, 8, and 9.
 
 ## Learning Objectives
 1. The basic operations of `ggplot` and "The Grammar of Graphics".
@@ -20,30 +18,12 @@ This assignment will draw upon many concepts primarily from Chapters 6, 8, and 9
 - Further understanding of differential expression analysis and its plotting.
 - A sense of superiority whenever you see a publication use the base R plotting package for figures.
 
-## Instructions
-Complete `main.R` in a way that satisfies all of the tests in `test_main.R`. Follow the instructions in the function descriptions for `main.R` and read here for details on the tests your code should satisfy. You will use these functions to complete figures in `report.Rmd`.
-
-You can use `testthat:test_file('test_main.R')` in your R console to run all tests in `test_main.R`. Do not modify the tests. While it is difficult to write tests that cover every solution to a problem, our tests are written to ensure the outputs of a function are aligned with what an analysis should perform. If you feel a test is working incorrectly, let a TA know.
-
 ## Function Details
 
 ### 1. `load_n_trim()`
 Once again we have some data to load into R in order to manipulate. We'll be loading a counts file, which is a matrix of genes (rows) by samples (columns). Each cell is the number of that gene found in that sample. This is a good opportunity to use a data frame or a tibble, but because of package restrictions we will be sticking to data frames for this assignment. We're using a couple different packages to process our data, and they input/output _exclusively_ in data frames, so we will be consistent and save ourselves some trouble with conversions.  
 
 We want to return a data frame that is essentially identical to our input file (always a good idea to use the command line to see what you're working with). Ensure the gene names are stored as `row.names` and _not_ as a separate column, data frames have a distinction between the two. This function should also reduce the columns to just those of interest (P0 and Adult).
-
-***Hints***
-Row names can be changed using the `row.names()` function. The new row names must be a character vector of exactly the same length.
-``` 
-df <- data.frame(a = c(0, 0, 0), b = c(1, 3, 5))
-row.names(df) <- c("Row1", "Row2", "Row3")
-print(df)
-     a b
-Row1 0 1
-Row2 0 3
-Row3 0 5
-```
-
 
 #### Tests
 ```
@@ -155,9 +135,6 @@ describe("Limma + Voom Integration", {
 ```
 
 This ultimately functions similarly to the first two series of tests: load test data, apply the function to it, make sure the results are the right size, shape, and type. This includes the voom procedure, so using _only_ limma results will yield failures.  
-
-***Hints***
-Note that Limma uses EdgeR to input data, so your first couple steps will look pretty familiar.
 
 
 ### 5. `combine_pval()`
